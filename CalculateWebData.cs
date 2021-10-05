@@ -8,14 +8,14 @@ namespace ConvolutionNeuralNetwork
 {
     static class CalculateWebData
     {
-        static public void Output(Web my_web, List<double> inputs)
+        static public void Calculate_Output(Web my_web, List<double> inputs)
         {
             for (int i = 0; i < my_web.layers[0].Count; i++)
                 my_web.layers[0][i].output = inputs[i];
-            GetSingleNeuronOutputs(my_web);
+            GetNeuronsOutputs(my_web);
         }
 
-        private static void GetSingleNeuronOutputs(Web my_web)
+        private static void GetNeuronsOutputs(Web my_web)
         {
             for (int i = 1; i < my_web.layers.Count; i++)
                 for (int j = 0; j < my_web.layers[i].Count; j++)

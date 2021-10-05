@@ -12,16 +12,17 @@ namespace ConvolutionNeuralNetwork
         static void Main(string[] args)
         {
             Web neural_web = new Web();
-            neural_web.web_structure = new List<int>() { 784, 16, 16, 10 };
-            neural_web.Fill(neural_web);
+            neural_web.web_structure = new List<int>() { 2,2,1 };
+            neural_web.FillSetValues(neural_web);
             double learningRate = 0.1;
-            List<InputsAndOutputs> listOfTrainingImages = Mnist.GetImagesFromFile(@"mnist_784_csv.csv", neural_web.web_structure);
+            //List<InputsAndOutputs> listOfTrainingImages = Mnist.GetImagesFromFile(@"mnist_784_csv.csv", neural_web.web_structure);
+            List<InputsAndOutputs> listOfTrainingImages = new List<InputsAndOutputs>() { new InputsAndOutputs(new List<double>() { 1, 0 }, new List<int>() { 1 }) };
 
             //poprawić filtry?
 
             double goodAnswers = 0;
             var rand = new Random();
-            int epochs = 10000;
+            int epochs = 100;
             for (int i = 0; i < epochs; i++)
             {
                 var choosenImage1= listOfTrainingImages[rand.Next(listOfTrainingImages.Count - 1)];
@@ -41,26 +42,8 @@ namespace ConvolutionNeuralNetwork
                 
 
 
-                CalculateWebData.Output(neural_web, choosenImage1.Inputs);
+                CalculateWebData.Calculate_Output(neural_web, choosenImage1.Inputs);
                 CalculateWebData.BackwardPropagation(neural_web, choosenImage1.Outputs, learningRate);
-
-
-
-                //double max = 0;
-                //foreach (var neuron in neural_web.layers.Last())
-                //{
-                //    if (neuron.output > max)
-                //        max = neuron.output;
-                //}
-                //int index=0;
-                //for (int j = 0; j < 10; j++)
-                //{
-                //    if (neural_web.layers.Last()[j].output == max)
-                //        index = j;
-                //}
-                //var goodAnswer = choosenImage1.Outputs[index]==1?true:false;
-                //if (i > 9990 && goodAnswer)
-                //    goodAnswers++;
 
 
             }
