@@ -17,7 +17,7 @@ namespace ConvolutionNeuralNetwork
                 image.Add(new List<double>());
                 for (int j = 0; j < size; j++)
                 {
-                    image.Last().Add(imageInArray[i+j]/255);
+                    image.Last().Add(imageInArray[i+j]);
                 }
             }
 
@@ -35,10 +35,10 @@ namespace ConvolutionNeuralNetwork
         public static List<List<double>> Convolution(List<List<double>> image, List<List<double>> filter, int stride)
         {
             var newImage = new List<List<double>>();
-            for (int i = filter.Count / 2; i < image.Count; i += stride)
+            for (int i = filter.Count / 2; i < image.Count-1; i += stride)
             {
                 newImage.Add(new List<double>());
-                for (int j = filter.Count / 2; j < image[0].Count; j += stride)
+                for (int j = filter.Count / 2; j < image[0].Count-1; j += stride)
                 {
                     List<List<double>> matrix = CreateTmpMatrix(i, j, image, filter.Count);
                     double sum = MultiplicationOfMatrices(matrix, filter);
