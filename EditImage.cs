@@ -190,6 +190,43 @@ namespace ConvolutionNeuralNetwork
                     new List<double>(){-1,0,1},
                     new List<double>(){-1,-1,0},
                 },
+
+                // nowe filtry, do sprawdzenia czy działają
+                new List<List<double>>() {
+                    new List<double>(){-1,1,1},
+                    new List<double>(){1,-1,1},
+                    new List<double>(){-1,-1,1},
+                },
+                new List<List<double>>() {
+                    new List<double>(){-1,2,-1},
+                    new List<double>(){2,-1,2},
+                    new List<double>(){-1,-1,-1},
+                },
+                new List<List<double>>() {
+                    new List<double>(){-1,-1,1},
+                    new List<double>(){-1,1,-1},
+                    new List<double>(){1,1,-1},
+                },
+                new List<List<double>>() {
+                    new List<double>(){-1,-1,1},
+                    new List<double>(){-1,1,-1},
+                    new List<double>(){1,1,1},
+                },
+                new List<List<double>>() {
+                    new List<double>(){1,1,1},
+                    new List<double>(){-1,-1,1},
+                    new List<double>(){-1,-1,1},
+                },
+                new List<List<double>>() {
+                    new List<double>(){1,1,1},
+                    new List<double>(){1,-1,-1},
+                    new List<double>(){1,-1,-1},
+                },
+                new List<List<double>>() {
+                    new List<double>(){-1,-1,1},
+                    new List<double>(){-1,1,-1},
+                    new List<double>(){1,1,-1},
+                },
             };
             return listOfFilters;
         }

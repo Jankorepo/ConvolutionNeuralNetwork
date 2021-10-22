@@ -29,7 +29,7 @@ namespace ConvolutionNeuralNetwork
                     List<string> chars_line = line.Split(',').ToList();
                     List<double> image = new List<double>();
                     foreach (var single_char in chars_line)
-                        image.Add(Convert.ToDouble(single_char));
+                        image.Add(Convert.ToDouble(single_char)/255);
                     image.RemoveAt(image.Count - 1);
 
                     int[] output = new int[10];
@@ -44,5 +44,6 @@ namespace ConvolutionNeuralNetwork
             return data;
             // przy zczytywaniu danych z pliku trzeba będzie dodać 10 wyjść zamiast jednego (jedynka na dobym indexie i reszta zera)
         }
+
     }
 }
