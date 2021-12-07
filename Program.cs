@@ -13,80 +13,114 @@ namespace ConvolutionNeuralNetwork
     {
         static void Main(string[] args)
         {
-            Web neural_web = new Web();
-            //neural_web.web_structure = new List<int>() { 784,28,10 };
-            neural_web.web_structure = new List<int>() { 720, 36, 8 };
-            neural_web.Fill(neural_web);
-            double learningRate = 0.15;
-            bool convolution = neural_web.web_structure[0]==784?false:true;
-            convolution = neural_web.web_structure[0] == 720 ? false : true;
+            bool useConvolutions = false;
+            int secondLayerNeuron = 28;
+            int lastLayerNeuron = 8;
+            int epochs = 10000;
+            int repeat = 20;
+            double learningRate = 0.1;
+
             //List<InputsAndOutputs> listOfTrainingImages2 = Mnist.GetImagesFromFile(@"mnist_784_csv.csv", neural_web.web_structure);
             //var listOfTrainingImages = listOfTrainingImages2.GetRange(0, 65000);
             //var listOfTestImages = listOfTrainingImages2.GetRange(65000, 5000);
 
-
-
             var listOfTrainingImages = JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki1.json"));
             listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki2.json")));
-            var listOfTestImages = JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Znaki do testowania.json"));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki3.json")));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki4.json")));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki5.json")));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki6.json")));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki7.json")));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki8.json")));
+            listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki9.json")));
+            //listOfTrainingImages.AddRange(JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Znaki do testowania.json")));
+            
+            var listOfTestImages = JsonConvert.DeserializeObject<List<InputsAndOutputs>>(File.ReadAllText(@"Zapisane znaki, Przemek.json"));
             //poprawić filtry?
             List<List<List<double>>> filters = EditImage.GetSome3x3Filters();
             double goodAnswers = 0;
-            var rand = new Random();
-            int epochs = 10000;
-            DateTime startTime = DateTime.Now;
 
-            for (int k = 0; k < 10; k++)
+            Web neural_web = new Web();
+            var rand = new Random();
+
+            for (int k = 0; k < repeat; k++)
             {
                 for (int i = 0; i < epochs; i++)
                 {
+                    if (useConvolutions)
+                    {
+                        var choosenImage = listOfTrainingImages[rand.Next(listOfTrainingImages.Count - 1)];
+                        var imageIn2DArray1 = EditImage.Swap1DListTo2DList(choosenImage.Inputs);
+                        List<List<List<double>>> listOfConvImages = new List<List<List<double>>>();
+                        for (int j = 0; j < filters.Count; j++)
+                        {
+                            //var convImage = EditImage.Pooling(imageIn2DArray1, 2, 2);
+                            var convImage = EditImage.Convolution(imageIn2DArray1, filters[j], stride: 1);
+                            convImage = EditImage.ReLU(convImage);
+                            convImage = EditImage.Pooling(convImage, 2, 2);
+                            listOfConvImages.Add(convImage);
+                        }
 
-                    var choosenImage1 = listOfTrainingImages[rand.Next(listOfTrainingImages.Count - 1)];
-                    var imageIn2DArray1 = EditImage.Swap1DListTo2DList(choosenImage1.Inputs, 28);
-                    List<List<List<double>>> listOfConvImages1 = new List<List<List<double>>>();
+                        var inputs = EditImage.SwapAll2DListsTo1DList(listOfConvImages);
+
+                        if (neural_web.layers.Count != 0)
+                        {
+                            CalculateWebData.Calculate_Output(neural_web, inputs);
+                            CalculateWebData.BackwardPropagation(neural_web, choosenImage.Outputs, learningRate);
+                        }
+                        else
+                        {
+                            neural_web.web_structure = new List<int>() { inputs.Count(), secondLayerNeuron, lastLayerNeuron };
+                            neural_web.Fill(neural_web);
+                        }
+                    }
 
 
-                    //for (int j = 0; j < filters.Count; j++)
-                    //{
-                    //    //var convImage = EditImage.Pooling(imageIn2DArray1, 2, 2);
-                    //    var convImage = EditImage.Convolution(imageIn2DArray1, filters[j], stride: 1);
-                    //    convImage = EditImage.ReLU(convImage);
-                    //    convImage = EditImage.Pooling(convImage, 2, 2);
-                    //    listOfConvImages1.Add(convImage);
-                    //}
-
-                    //var inputs1 = EditImage.SwapAll2DListsTo1DList(listOfConvImages1);
-
-                    //if (inputs1.Count != neural_web.web_structure[0])
-                    //    throw new Exception();
-                    CalculateWebData.Calculate_Output(neural_web, choosenImage1.Inputs);
-                    CalculateWebData.BackwardPropagation(neural_web, choosenImage1.Outputs, learningRate);
-
-                    //int num1 = -1;
-                    //int num2 = choosenImage1.Outputs.IndexOf(choosenImage1.Outputs.Where(x => x == 1).FirstOrDefault());
-                    //double max = 0;
-                    //foreach (var item in neural_web.layers.Last())
-                    //{
-                    //    if (item.output > max && item.output > 0.1)
-                    //    {
-                    //        num1 = neural_web.layers.Last().IndexOf(item);
-                    //        max = item.output;
-                    //    }
-
-                    //}
-                    //if (i > 49000)
-                    //    if (num1 == num2)
-                    //        goodAnswers++;
-                    //if (i % 1000 == 0 && i != 0)
-                    //    Console.WriteLine(i.ToString());
+                    else if (!useConvolutions)
+                    {
+                        var choosenImage = listOfTrainingImages[rand.Next(listOfTrainingImages.Count - 1)];
+                        if (neural_web.layers.Count != 0)
+                        {
+                            CalculateWebData.Calculate_Output(neural_web, choosenImage.Inputs);
+                            CalculateWebData.BackwardPropagation(neural_web, choosenImage.Outputs, learningRate);
+                        }
+                        else
+                        {
+                            neural_web.web_structure = new List<int>() { listOfTrainingImages[0].Inputs.Count(), secondLayerNeuron, lastLayerNeuron };
+                            neural_web.Fill(neural_web);
+                        }
+                    }
                 }
-
-                //sprawdzenie wyników
                 goodAnswers = 0;
-                
+                double celnosc = 0;
+                double predkosc = 0;
+                double regeneracja = 0;
+                double wytrzymalosc = 0;
+                double ogien = 0;
+                double powietrze = 0;
+                double woda = 0;
+                double ziemia = 0;
                 foreach (var image in listOfTestImages)
                 {
-                    CalculateWebData.Calculate_Output(neural_web, image.Inputs);
+                    if (useConvolutions)
+                    {
+                        var imageIn2DArray1 = EditImage.Swap1DListTo2DList(image.Inputs);
+                        List<List<List<double>>> listOfConvImages1 = new List<List<List<double>>>();
+                        for (int j = 0; j < filters.Count; j++)
+                        {
+                            //var convImage = EditImage.Pooling(imageIn2DArray1, 2, 2);
+                            var convImage = EditImage.Convolution(imageIn2DArray1, filters[j], stride: 1);
+                            convImage = EditImage.ReLU(convImage);
+                            convImage = EditImage.Pooling(convImage, 2, 2);
+                            listOfConvImages1.Add(convImage);
+                        }
+                        var inputs = EditImage.SwapAll2DListsTo1DList(listOfConvImages1);
+                        CalculateWebData.Calculate_Output(neural_web, inputs);
+                    }
+                    else if (!useConvolutions)
+                        CalculateWebData.Calculate_Output(neural_web, image.Inputs);
+
+
                     int num1 = -1;
                     int num2 = image.Outputs.IndexOf(image.Outputs.Where(x => x == 1).FirstOrDefault());
                     double max = 0;
@@ -97,39 +131,58 @@ namespace ConvolutionNeuralNetwork
                             num1 = neural_web.layers.Last().IndexOf(item);
                             max = item.output;
                         }
-
                     }
                     if (num1 == num2)
+                    {
                         goodAnswers++;
+                        if (num1 == 0)
+                            celnosc++;
+                        else if (num1 == 1)
+                            predkosc++;
+                        else if (num1 == 2)
+                            regeneracja++;
+                        else if (num1 == 3)
+                            wytrzymalosc++;
+                        else if (num1 == 4)
+                            ogien++;
+                        else if (num1 == 5)
+                            powietrze++;
+                        else if (num1 == 6)
+                            woda++;
+                        else if (num1 == 7)
+                            ziemia++;
+                    }
                 }
-                Console.WriteLine("\n" + (Math.Round(goodAnswers / listOfTestImages.Count, 4)*100).ToString() + "%");
+                Console.WriteLine("\nIlość nauczonych epok: " + ((k + 1) * epochs).ToString());
+                Console.WriteLine("Średnia dobrych odpowiedzi: " + (Math.Round(goodAnswers / listOfTestImages.Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Celność: " + (Math.Round(celnosc /
+                    listOfTestImages.Where(x => x.Outputs[0] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Prędkość: " + (Math.Round(predkosc /
+                    listOfTestImages.Where(x => x.Outputs[1] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Regeneracja: " + (Math.Round(regeneracja /
+                    listOfTestImages.Where(x => x.Outputs[2] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Wytrzymałość: " + (Math.Round(wytrzymalosc /
+                    listOfTestImages.Where(x => x.Outputs[3] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Ogień: " + (Math.Round(ogien /
+                    listOfTestImages.Where(x => x.Outputs[4] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Powietrze: " + (Math.Round(powietrze /
+                    listOfTestImages.Where(x => x.Outputs[5] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Woda: " + (Math.Round(woda /
+                    listOfTestImages.Where(x => x.Outputs[6] == 1).ToList().Count, 4) * 100).ToString() + "%");
+                Console.WriteLine("Ziemia: " + (Math.Round(ziemia /
+                    listOfTestImages.Where(x => x.Outputs[7] == 1).ToList().Count, 4) * 100).ToString() + "%");
             }
-            
-
-            DateTime stopTime = DateTime.Now;
-            TimeSpan roznica = stopTime - startTime;
-            string result = "\nStruktura: ";
-            foreach (var item in neural_web.web_structure)
-            {
-                result += item.ToString() + ",";
-            }
-            result += "  Ilość próbek: " + epochs.ToString() + ",  ";
-            result += "  Wynik: " + Math.Round(goodAnswers / listOfTestImages.Count, 2).ToString() +"%,  ";
-            result += "  Czas: " + Math.Round(roznica.TotalMinutes,1).ToString()+"min";
-            result += "  Konwolucje: " + convolution.ToString();
-            File.AppendAllText("Wyniki uczenia sieci.txt", result);
-
-            
-
 
             //var imageIn2DArray = EditImage.Swap1DListTo2DList(choosenImage.Inputs, 28);
             //var bitmap = EditImage.ChangeListsToBitmap(imageIn2DArray);
             //bitmap.Save("mnist" + 5 + ".png", ImageFormat.Png);
-
+            foreach (var neuron in neural_web.layers.Last())
+            {
+                neuron.output = 0;
+                neuron.correction = 0;
+            }
+            File.WriteAllText(@"Web.json", JsonConvert.SerializeObject(neural_web));
             Console.ReadKey();
-
-            
         }
-
     }
 }

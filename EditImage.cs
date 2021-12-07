@@ -23,12 +23,26 @@ namespace ConvolutionNeuralNetwork
 
             return image;
         }
+        public static List<List<double>> Swap1DListTo2DList(List<double> array)
+        {
+            List<List<double>> image2D = new List<List<double>>();
+            for (int i = 0; i < array.Count / 24; i++)
+            {
+                image2D.Add(new List<double>());
+                for (int j = 0; j < 24; j++)
+                {
+                    image2D.Last().Add(array[(i * 24) + j]);
+                }
+            }
+            return image2D;
+        }
+
         public static List<double> SwapAll2DListsTo1DList(List<List<List<double>>> listOfConvImages)
         {
             List<double> array = new List<double>();
             foreach (var list in listOfConvImages)
                 for (int i = 0; i < list.Count; i++)
-                    for (int j = 0; j < list.Count; j++)
+                    for (int j = 0; j < list[0].Count; j++)
                         array.Add(list[i][j]);
             return array;
         }
@@ -80,12 +94,13 @@ namespace ConvolutionNeuralNetwork
         }
         internal static List<List<double>> Pooling(List<List<double>> image, int maxPoolingSize, int stride)
         {
-            var size = image.Count % 2 == 1 ? image.Count + 1 : image.Count;
+            var sizeX = image.Count % 2 == 1 ? image.Count + 1 : image.Count;
+            var sizeY = image[0].Count % 2 == 1 ? image[0].Count + 1 : image[0].Count;
             var imageAfterPooling = new List<List<double>>();
-            for (int i = 1; i < size; i += stride)
+            for (int i = 1; i < sizeX; i += stride)
             {
                 imageAfterPooling.Add(new List<double>());
-                for (int j = 1; j < size; j += stride)
+                for (int j = 1; j < sizeY; j += stride)
                 {
                     double highestValue = ChooseHighestValue(i, j, image, maxPoolingSize);
                     imageAfterPooling.Last().Add(highestValue);
